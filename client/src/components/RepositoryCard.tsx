@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Repository, buildRepository, runRepository } from "@/api/repository";
+import { Repository, runRepository, buildRepository } from "@/api/repository";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -77,7 +77,7 @@ export function RepositoryCard({ repository: initialRepository, onViewLogs, onSt
           description: "Repository has been run successfully",
         });
       } else {
-        throw new Error("Failed to run repository");
+        throw new Error(result.error || "Failed to run repository");
       }
     } catch (error) {
       console.error("Error running repository:", error);
@@ -85,8 +85,11 @@ export function RepositoryCard({ repository: initialRepository, onViewLogs, onSt
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to run repository",
+        description: error.message || "Failed to run repository",
       });
+    } finally {
+      // Ensure the 'Run' button becomes clickable again
+      updateRepositoryStatus('ready');
     }
   };
 

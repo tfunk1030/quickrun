@@ -50,12 +50,15 @@ export const buildRepository = async (id: string): Promise<{ success: boolean; m
 };
 
 // Run Repository
-export const runRepository = async (id: string): Promise<{ success: boolean; logs: string[] }> => {
+export const runRepository = async (id: string): Promise<{ success: boolean; message?: string; error?: string }> => {
   try {
     const response = await api.post(`/repositories/${id}/run`);
     return response.data;
   } catch (error) {
     console.error("Error running repository:", error);
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
     throw error;
   }
 };

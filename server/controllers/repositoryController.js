@@ -153,15 +153,20 @@ export const runRepository = async (req, res) => {
     const repository = repositoryStore.get(id);
 
     if (!repository) {
-      return res.status(404).json({ error: 'Repository not found' });
+      return res.status(404).json({ success: false, error: 'Repository not found' });
     }
 
     if (repository.status !== 'ready') {
-      return res.status(400).json({ error: 'Repository is not ready to run' });
+      return res.status(400).json({ success: false, error: 'Repository is not ready to run' });
     }
 
     // Simulate running the repository
     const logs = ['Starting application...', 'Application running on port 3000'];
+
+    // Simulate a random error (for testing purposes)
+    if (Math.random() < 0.3) {
+      throw new Error('Simulated run failure');
+    }
 
     // Emit logs in real-time
     logs.forEach((log, index) => {
@@ -179,7 +184,8 @@ export const runRepository = async (req, res) => {
     log.info(`Repository ${id} run successfully`);
     res.json({ success: true, message: 'Repository started running' });
   } catch (error) {
-    console.error('Error running repository:', error);
-    res.status(500).json({ error: 'Failed to run repository' });
+    log.error('Error running repository:', error);
+    const errorMessage = error.message || 'Failed to run repository';
+    res.status(500).json({ success: false, error: errorMessage });
   }
 };

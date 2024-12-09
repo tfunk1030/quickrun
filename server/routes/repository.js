@@ -12,6 +12,9 @@ router.post('/build', (req, res, next) => {
   next();
 }, buildRepository);
 
-router.get('/:id', getRepository); // Add this new route
+router.get('/:id', (req, res, next) => {
+  console.log(`Received request to /api/repositories/${req.params.id}`);
+  next();
+}, getRepository);
 
 export default router;

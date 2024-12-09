@@ -93,13 +93,24 @@ export const getRepository = async (req, res) => {
     // For now, we'll return a mock repository object
     const repository = {
       id,
-      url: 'https://github.com/example/repo',
-      name: 'Example Repository',
+      url: `https://github.com/example/repo-${id}`,
+      name: `Example Repository ${id}`,
       language: 'JavaScript',
-      status: 'ready',
-      buildLogs: ['Build started', 'Dependencies installed', 'Build completed'],
+      status: ['pending', 'building', 'ready', 'error'][Math.floor(Math.random() * 4)],
+      buildLogs: [
+        'Build started',
+        'Cloning repository...',
+        'Installing dependencies...',
+        'Running tests...',
+        'Build completed successfully'
+      ],
     };
 
+    if (repository.status === 'error') {
+      repository.error = 'An error occurred during the build process';
+    }
+
+    log.info(`Repository fetched successfully: ${JSON.stringify(repository)}`);
     res.json(repository);
   } catch (error) {
     log.error('Error fetching repository:', error);

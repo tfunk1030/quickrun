@@ -132,3 +132,32 @@ export const getRepository = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch repository' });
   }
 };
+
+export const runRepository = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const repository = repositoryStore.get(id);
+
+    if (!repository) {
+      return res.status(404).json({ error: 'Repository not found' });
+    }
+
+    if (repository.status !== 'ready') {
+      return res.status(400).json({ error: 'Repository is not ready to run' });
+    }
+
+    // Simulate running the repository
+    const logs = ['Starting application...'];
+
+    // Simulate some processing time
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    logs.push('Application running on port 3000');
+
+    log.info(`Repository ${id} run successfully`);
+    res.json({ success: true, logs });
+  } catch (error) {
+    log.error('Error running repository:', error);
+    res.status(500).json({ error: 'Failed to run repository' });
+  }
+};

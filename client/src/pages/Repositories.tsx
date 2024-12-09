@@ -7,21 +7,34 @@ import { useToast } from "@/hooks/useToast";
 export function Repositories() {
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchRepositories = async () => {
-      console.log("Fetching repositories with search query:", search);
+      if (!search.trim()) return;
+      setLoading(true);
       try {
         const data = await searchRepositories(search);
-        console.log("Received repository data:", data);
         setRepositories(data);
       } catch (error) {
         console.error("Error fetching repositories:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch repositories. Please try again.",
+        });
+      } finally {
+        setLoading(false);
       }
     };
-    fetchRepositories();
-  }, [search]);
+
+    const debounceTimer = setTimeout(() => {
+      fetchRepositories();
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [search, toast]);
 
   const handleRun = async (id: string) => {
     try {
@@ -46,6 +59,8 @@ export function Repositories() {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
+      {loading && <p>Loading...</p>}
+      {!loading && repositories.length === 0 && <p>No repositories found.</p>}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {repositories.map((repo) => (
           <RepositoryCard

@@ -16,10 +16,8 @@ export type Repository = {
 // Request: { query: string }
 // Response: Repository[]
 export const searchRepositories = async (query: string): Promise<Repository[]> => {
-  console.log("Sending search request to backend with query:", query);
   try {
-    const response = await api.get(`/repositories/search?query=${query}`);
-    console.log("Received response from backend:", response.data);
+    const response = await api.get(`/repositories/search?query=${encodeURIComponent(query)}`);
     return response.data;
   } catch (error) {
     console.error("Error in searchRepositories:", error);

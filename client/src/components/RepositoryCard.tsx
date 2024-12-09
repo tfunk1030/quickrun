@@ -1,16 +1,82 @@
-import { Repository } from "@/api/repository";
+import React, { useState } from 'react';
+import { Repository, buildRepository, runRepository } from "@/api/repository";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Play, AlertCircle, FileText, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/useToast";
 
 type RepositoryCardProps = {
   repository: Repository;
-  onRun: () => void;
   onViewLogs: () => void;
+  onStatusChange: (id: string, newStatus: Repository['status']) => void;
 };
 
-export function RepositoryCard({ repository, onRun, onViewLogs }: RepositoryCardProps) {
+export function RepositoryCard({ repository: initialRepository, onViewLogs, onStatusChange }: RepositoryCardProps) {
+  const [repository, setRepository] = useState(initialRepository);
+  const { toast } = useToast();
+
+  const updateRepositoryStatus = (newStatus: Repository['status']) => {
+    setRepository(prev => ({ ...prev, status: newStatus }));
+    onStatusChange(repository.id, newStatus);
+  };
+
+  const handleBuild = async () => {
+    updateRepositoryStatus('building');
+    try {
+      const buildResult = await buildRepository(repository.id);
+      if (buildResult.success) {
+        updateRepositoryStatus('ready');
+        toast({
+          title: "Build Successful",
+          description: "Repository has been built successfully",
+        });
+      } else {
+        throw new Error(buildResult.message || "Build failed");
+      }
+    } catch (error) {
+      console.error("Error building repository:", error);
+      updateRepositoryStatus('error');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to build repository",
+      });
+    }
+  };
+
+  const handleRun = async () => {
+    if (repository.status !== 'ready') {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Repository must be built before running",
+      });
+      return;
+    }
+
+    updateRepositoryStatus('running');
+    try {
+      const result = await runRepository(repository.id);
+      if (result.success) {
+        toast({
+          title: "Repository Run",
+          description: "Repository has been run successfully",
+        });
+      } else {
+        throw new Error("Failed to run repository");
+      }
+    } catch (error) {
+      console.error("Error running repository:", error);
+      updateRepositoryStatus('error');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to run repository",
+      });
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -38,22 +104,28 @@ export function RepositoryCard({ repository, onRun, onViewLogs }: RepositoryCard
         </div>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button
-          onClick={onRun}
-          disabled={repository.status === 'building'}
-        >
-          {repository.status === 'building' ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : repository.status === 'error' ? (
-            <AlertCircle className="mr-2 h-4 w-4" />
-          ) : (
-            <Play className="mr-2 h-4 w-4" />
-          )}
-          {repository.status === 'ready' ? 'Run' :
-           repository.status === 'error' ? 'Failed' :
-           repository.status === 'building' ? 'Building...' :
-           'Start Build'}
-        </Button>
+        {repository.status === 'Not started' || repository.status === 'error' ? (
+          <Button onClick={handleBuild} disabled={repository.status === 'building'}>
+            {repository.status === 'building' ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Play className="mr-2 h-4 w-4" />
+            )}
+            {repository.status === 'building' ? 'Building...' : 'Build'}
+          </Button>
+        ) : (
+          <Button
+            onClick={handleRun}
+            disabled={repository.status === 'running' || repository.status === 'building'}
+          >
+            {repository.status === 'running' ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Play className="mr-2 h-4 w-4" />
+            )}
+            {repository.status === 'running' ? 'Running...' : 'Run'}
+          </Button>
+        )}
         <Button variant="outline" onClick={onViewLogs}>
           <FileText className="mr-2 h-4 w-4" />
           View Logs

@@ -7,8 +7,8 @@ router.get('/search', (req, res, next) => {
   next();
 }, searchRepositories);
 
-router.post('/build', (req, res, next) => {
-  console.log("Received request to /api/repositories/build");
+router.post('/:id/build', (req, res, next) => {
+  console.log(`Received request to build repository ${req.params.id}`);
   next();
 }, buildRepository);
 

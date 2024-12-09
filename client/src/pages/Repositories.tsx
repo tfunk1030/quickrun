@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { searchRepositories, Repository, buildRepository, getRepository } from "@/api/repository";
+import { searchRepositories, Repository, runRepository, buildRepository, getRepository } from "@/api/repository";
 import { RepositoryCard } from "@/components/RepositoryCard";
 import { BuildLogsModal } from "@/components/BuildLogsModal";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,6 @@ export function Repositories() {
   const { toast } = useToast();
 
   useEffect(() => {
-    console.log("Repositories useEffect triggered. Search query:", search);
     const fetchRepositories = async () => {
       if (!search.trim()) {
         setRepositories([]);
@@ -48,40 +47,55 @@ export function Repositories() {
   }, [search, toast]);
 
   const handleRun = async (id: string) => {
-    console.log("handleRun called for repository:", id);
     try {
-      const updatedRepo = await buildRepository(id);
-      setRepositories(repos => repos.map(repo => repo.id === id ? updatedRepo : repo));
-      toast({
-        title: "Build Started",
-        description: "Repository build has been initiated",
-      });
+      const result = await runRepository(id);
+      if (result.success) {
+        setRepositories(repos => repos.map(repo =>
+          repo.id === id ? { ...repo, status: 'ready', buildLogs: result.logs } : repo
+        ));
+        toast({
+          title: "Repository Run",
+          description: "Repository has been run successfully",
+        });
+      } else {
+        throw new Error("Failed to run repository");
+      }
     } catch (error) {
-      console.error("Error building repository:", error);
+      console.error("Error running repository:", error);
+      setRepositories(repos => repos.map(repo =>
+        repo.id === id ? { ...repo, status: 'error' } : repo
+      ));
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to start repository build",
+        description: "Failed to run repository",
       });
     }
   };
 
   const handleViewLogs = async (id: string) => {
-    console.log("View Logs clicked for repository:", id);
     try {
-      const repository = await getRepository(id);
-      console.log("Repository data received:", repository);
-      setSelectedRepository(repository);
-      setIsLogsModalOpen(true);
-      console.log("Logs modal should be open now");
+      const repository = repositories.find(repo => repo.id === id);
+      if (repository) {
+        setSelectedRepository(repository);
+        setIsLogsModalOpen(true);
+      } else {
+        throw new Error("Repository not found");
+      }
     } catch (error) {
-      console.error("Error fetching repository logs:", error);
+      console.error("Error viewing logs:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to fetch repository logs",
+        description: "Failed to view logs",
       });
     }
+  };
+
+  const handleStatusChange = (id: string, newStatus: Repository['status']) => {
+    setRepositories(repos => repos.map(repo =>
+      repo.id === id ? { ...repo, status: newStatus } : repo
+    ));
   };
 
   return (
@@ -108,6 +122,7 @@ export function Repositories() {
             repository={repo}
             onRun={() => handleRun(repo.id)}
             onViewLogs={() => handleViewLogs(repo.id)}
+            onStatusChange={handleStatusChange}
           />
         ))}
       </div>

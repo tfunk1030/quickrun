@@ -39,32 +39,23 @@ export const getRepository = async (id: string): Promise<Repository> => {
 };
 
 // Build Repository
-// POST /repositories/build
-// Request: { id: string }
-// Response: Repository
-export const buildRepository = async (url: string): Promise<Repository> => {
-  console.log("buildRepository called with URL:", url);
+export const buildRepository = async (id: string): Promise<{ success: boolean; message: string }> => {
   try {
-    const response = await api.post('/repositories/build', { id: url });
-    console.log("buildRepository response:", response.data);
+    const response = await api.post(`/repositories/${id}/build`);
     return response.data;
   } catch (error) {
-    console.error("Error in buildRepository:", error);
+    console.error("Error building repository:", error);
     throw error;
   }
 };
 
 // Run Repository
-// POST /repositories/:id/run
-// Response: { success: boolean, logs: string[] }
-export const runRepository = async (id: string) => {
-  // Mock data
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        success: true,
-        logs: ['Starting application...', 'Application running on port 3000']
-      });
-    }, 500);
-  });
+export const runRepository = async (id: string): Promise<{ success: boolean; logs: string[] }> => {
+  try {
+    const response = await api.post(`/repositories/${id}/run`);
+    return response.data;
+  } catch (error) {
+    console.error("Error running repository:", error);
+    throw error;
+  }
 };

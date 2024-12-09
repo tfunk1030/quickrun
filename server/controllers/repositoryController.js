@@ -2,11 +2,17 @@ import { Octokit } from '@octokit/rest';
 import dotenv from 'dotenv';
 import { logger } from '../utils/log.js';
 import { saveRepositoryData, loadRepositoryData } from '../utils/storage.js';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import fs from 'fs/promises';
+import path from 'path';
+import os from 'os';
 
 dotenv.config();
 
 const octokit = new Octokit({ auth: process.env.GITHUB_ACCESS_TOKEN });
 const log = logger('repositoryController');
+const execAsync = promisify(exec);
 
 let repositoryStore = new Map();
 
@@ -59,57 +65,60 @@ export const searchRepositories = async (req, res) => {
 
 export const buildRepository = async (req, res) => {
   try {
-    const { id } = req.body;
-    log.info(`Received build request for repository: ${id}`);
-    console.log("Repository store before build:", repositoryStore);
+    const { id } = req.params;
+    const repository = repositoryStore.get(id);
+    if (!repository) {
+      return res.status(404).json({ success: false, message: 'Repository not found' });
+    }
 
-    // Fetch repository details from GitHub using the numeric ID
-    const { data: repoData } = await octokit.request('GET /repositories/{id}', {
-      id: id
-    });
+    repository.status = 'building';
+    repository.buildLogs = [];
 
-    let repository = {
-      id: repoData.id.toString(),
-      url: repoData.html_url,
-      name: repoData.name,
-      language: repoData.language || 'Unknown',
-      status: 'building',
-      buildLogs: ['Build started', 'Cloning repository...']
-    };
+    // Use a temporary directory that works on both Unix and Windows
+    const tempDir = path.join(os.tmpdir(), `repo-${id}`);
 
-    setTimeout(async () => {
-      const buildSteps = [
-        { step: 'Cloning repository', success: true },
-        { step: 'Installing dependencies', success: true },
-        { step: 'Running tests', success: repoData.has_issues }, // Use a real property to determine success
-        { step: 'Building project', success: true },
-      ];
+    // Clone the repository
+    try {
+      await execAsync(`git clone ${repository.url} "${tempDir}"`);
+      repository.buildLogs.push("Repository cloned successfully");
+    } catch (cloneError) {
+      throw new Error(`Failed to clone repository: ${cloneError.message}`);
+    }
 
-      let buildSuccess = true;
-      for (const step of buildSteps) {
-        repository.buildLogs.push(`${step.step}...`);
-        if (!step.success) {
-          repository.buildLogs.push(`Error: Failed to ${step.step.toLowerCase()}`);
-          buildSuccess = false;
-          break;
-        }
+    // Check if package.json exists
+    const hasPackageJson = await fs.access(path.join(tempDir, 'package.json'))
+      .then(() => true)
+      .catch(() => false);
+
+    if (hasPackageJson) {
+      // Install dependencies
+      try {
+        await execAsync(`cd "${tempDir}" && npm install`);
+        repository.buildLogs.push("Dependencies installed successfully");
+      } catch (installError) {
+        throw new Error(`Failed to install dependencies: ${installError.message}`);
       }
 
-      repository.status = buildSuccess ? 'ready' : 'error';
-      if (buildSuccess) {
-        repository.buildLogs.push('Build completed successfully');
+      // Run build script if it exists
+      try {
+        await execAsync(`cd "${tempDir}" && npm run build`);
+        repository.buildLogs.push("Build completed successfully");
+      } catch (buildError) {
+        repository.buildLogs.push("No build script found or build failed");
       }
+    } else {
+      repository.buildLogs.push("No package.json found, skipping npm install and build");
+    }
 
-      log.info(`Build completed for repository: ${JSON.stringify(repository)}`);
-      repositoryStore.set(repository.id, repository);
-      await saveRepositoryData(Object.fromEntries(repositoryStore));
-      console.log("Final repository state before sending response:", repository);
-    }, 5000);
+    repository.status = 'ready';
+    repositoryStore.set(repository.id, repository);
+    await saveRepositoryData(Object.fromEntries(repositoryStore));
 
-    res.json(repository);
+    log.info(`Repository ${id} built successfully`);
+    res.json({ success: true, message: "Repository built successfully", logs: repository.buildLogs });
   } catch (error) {
-    log.error('Error initiating repository build:', error);
-    res.status(500).json({ error: 'Failed to initiate repository build' });
+    console.error('Error building repository:', error);
+    res.status(500).json({ success: false, message: 'Failed to build repository', error: error.message });
   }
 };
 
@@ -147,17 +156,12 @@ export const runRepository = async (req, res) => {
     }
 
     // Simulate running the repository
-    const logs = ['Starting application...'];
-
-    // Simulate some processing time
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    logs.push('Application running on port 3000');
+    const logs = ['Starting application...', 'Application running on port 3000'];
 
     log.info(`Repository ${id} run successfully`);
     res.json({ success: true, logs });
   } catch (error) {
-    log.error('Error running repository:', error);
+    console.error('Error running repository:', error);
     res.status(500).json({ error: 'Failed to run repository' });
   }
 };

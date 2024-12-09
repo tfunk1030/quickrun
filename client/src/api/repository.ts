@@ -40,11 +40,13 @@ export const getRepository = async (id: string): Promise<Repository> => {
 
 // Build Repository
 // POST /repositories/build
-// Request: { url: string }
+// Request: { id: string }
 // Response: Repository
 export const buildRepository = async (url: string): Promise<Repository> => {
+  console.log("buildRepository called with URL:", url);
   try {
-    const response = await api.post('/repositories/build', { url });
+    const response = await api.post('/repositories/build', { id: url });
+    console.log("buildRepository response:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error in buildRepository:", error);

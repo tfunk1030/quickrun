@@ -80,7 +80,7 @@ app.use(basicRoutes);
 // Authentication Routes
 app.use('/api/auth', authRoutes);
 
-// Repository Routes - Added for GitHub repository search
+// Repository Routes - Added for GitHub repository search and build
 app.use('/api/repositories', repositoryRoutes);
 
 // If no routes handled the request, it's a 404

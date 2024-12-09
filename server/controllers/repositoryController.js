@@ -15,10 +15,15 @@ const log = logger('repositoryController');
 const execAsync = promisify(exec);
 
 let repositoryStore = new Map();
+let io;
 
 // Load data when the server starts
 loadRepositoryData().then(data => {
   repositoryStore = new Map(Object.entries(data));
+});
+
+import('../server.js').then(module => {
+  io = module.io;
 });
 
 export const searchRepositories = async (req, res) => {
@@ -158,8 +163,21 @@ export const runRepository = async (req, res) => {
     // Simulate running the repository
     const logs = ['Starting application...', 'Application running on port 3000'];
 
+    // Emit logs in real-time
+    logs.forEach((log, index) => {
+      setTimeout(() => {
+        if (io) {
+          io.emit(`repository:${id}:log`, log);
+        }
+      }, index * 1000);
+    });
+
+    repository.status = 'running';
+    repositoryStore.set(id, repository);
+    await saveRepositoryData(Object.fromEntries(repositoryStore));
+
     log.info(`Repository ${id} run successfully`);
-    res.json({ success: true, logs });
+    res.json({ success: true, message: 'Repository started running' });
   } catch (error) {
     console.error('Error running repository:', error);
     res.status(500).json({ error: 'Failed to run repository' });

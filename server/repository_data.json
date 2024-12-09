@@ -39,6 +39,14 @@
     "status": "Not started",
     "buildLogs": []
   },
+  "6934395": {
+    "id": "6934395",
+    "url": "https://github.com/facebook/rocksdb",
+    "name": "rocksdb",
+    "language": "C++",
+    "status": "Not started",
+    "buildLogs": []
+  },
   "8768406": {
     "id": "8768406",
     "url": "https://github.com/postcss/autoprefixer",
@@ -76,6 +84,14 @@
     "url": "https://github.com/getify/You-Dont-Know-JS",
     "name": "You-Dont-Know-JS",
     "language": null,
+    "status": "Not started",
+    "buildLogs": []
+  },
+  "17803236": {
+    "id": "17803236",
+    "url": "https://github.com/rclone/rclone",
+    "name": "rclone",
+    "language": "Go",
     "status": "Not started",
     "buildLogs": []
   },
@@ -162,6 +178,14 @@
     "status": "Not started",
     "buildLogs": []
   },
+  "23405758": {
+    "id": "23405758",
+    "url": "https://github.com/google/leveldb",
+    "name": "leveldb",
+    "language": "C++",
+    "status": "Not started",
+    "buildLogs": []
+  },
   "23654633": {
     "id": "23654633",
     "url": "https://github.com/simonbengtsson/jsPDF-AutoTable",
@@ -215,6 +239,14 @@
     "url": "https://github.com/jaungiers/Tinder-py_auto_liker",
     "name": "Tinder-py_auto_liker",
     "language": "Python",
+    "status": "Not started",
+    "buildLogs": []
+  },
+  "29261473": {
+    "id": "29261473",
+    "url": "https://github.com/minio/minio",
+    "name": "minio",
+    "language": "Go",
     "status": "Not started",
     "buildLogs": []
   },
@@ -341,6 +373,14 @@
     "status": "Not started",
     "buildLogs": []
   },
+  "56899284": {
+    "id": "56899284",
+    "url": "https://github.com/Kong/insomnia",
+    "name": "insomnia",
+    "language": "JavaScript",
+    "status": "Not started",
+    "buildLogs": []
+  },
   "60493101": {
     "id": "60493101",
     "url": "https://github.com/jwasham/coding-interview-university",
@@ -451,6 +491,14 @@
       "Build completed successfully"
     ]
   },
+  "132659513": {
+    "id": "132659513",
+    "url": "https://github.com/vashpan/xcode-dev-cleaner",
+    "name": "xcode-dev-cleaner",
+    "language": "Swift",
+    "status": "Not started",
+    "buildLogs": []
+  },
   "149683226": {
     "id": "149683226",
     "url": "https://github.com/simc/auto_size_text",
@@ -464,14 +512,25 @@
     "url": "https://github.com/AdithyaReddy/TinderAutomation",
     "name": "TinderAutomation",
     "language": "Python",
-    "status": "Not started",
-    "buildLogs": []
+    "status": "running",
+    "buildLogs": [
+      "Repository cloned successfully",
+      "No package.json found, skipping npm install and build"
+    ]
   },
   "159791040": {
     "id": "159791040",
     "url": "https://github.com/automl/Auto-PyTorch",
     "name": "Auto-PyTorch",
     "language": "Python",
+    "status": "Not started",
+    "buildLogs": []
+  },
+  "160125489": {
+    "id": "160125489",
+    "url": "https://github.com/phongnguyend/Practical.CleanArchitecture",
+    "name": "Practical.CleanArchitecture",
+    "language": "C#",
     "status": "Not started",
     "buildLogs": []
   },
@@ -499,6 +558,14 @@
     "status": "Not started",
     "buildLogs": []
   },
+  "172888322": {
+    "id": "172888322",
+    "url": "https://github.com/mmobin789/Android-Custom-Gallery",
+    "name": "Android-Custom-Gallery",
+    "language": "Kotlin",
+    "status": "Not started",
+    "buildLogs": []
+  },
   "181807451": {
     "id": "181807451",
     "url": "https://github.com/bournafide/AUTPRIMEAPP",
@@ -523,11 +590,27 @@
     "status": "Not started",
     "buildLogs": []
   },
+  "191113739": {
+    "id": "191113739",
+    "url": "https://github.com/0voice/interview_internal_reference",
+    "name": "interview_internal_reference",
+    "language": "Python",
+    "status": "Not started",
+    "buildLogs": []
+  },
   "208576292": {
     "id": "208576292",
     "url": "https://github.com/borgwang/tinynn-autograd",
     "name": "tinynn-autograd",
     "language": "Python",
+    "status": "Not started",
+    "buildLogs": []
+  },
+  "208728772": {
+    "id": "208728772",
+    "url": "https://github.com/milvus-io/milvus",
+    "name": "milvus",
+    "language": "Go",
     "status": "Not started",
     "buildLogs": []
   },
@@ -590,11 +673,35 @@
     "status": "Not started",
     "buildLogs": []
   },
+  "238864562": {
+    "id": "238864562",
+    "url": "https://github.com/xelA/birthday.py",
+    "name": "birthday.py",
+    "language": "Python",
+    "status": "Not started",
+    "buildLogs": []
+  },
+  "266592249": {
+    "id": "266592249",
+    "url": "https://github.com/builtbybel/burnbytes",
+    "name": "burnbytes",
+    "language": "C#",
+    "status": "Not started",
+    "buildLogs": []
+  },
   "269587269": {
     "id": "269587269",
     "url": "https://github.com/JulesBelveze/time-series-autoencoder",
     "name": "time-series-autoencoder",
     "language": "Python",
+    "status": "Not started",
+    "buildLogs": []
+  },
+  "274472671": {
+    "id": "274472671",
+    "url": "https://github.com/zszszszsz/.config",
+    "name": ".config",
+    "language": "Shell",
     "status": "Not started",
     "buildLogs": []
   },
@@ -614,10 +721,26 @@
     "status": "Not started",
     "buildLogs": []
   },
+  "323965659": {
+    "id": "323965659",
+    "url": "https://github.com/AlistGo/alist",
+    "name": "alist",
+    "language": "Go",
+    "status": "Not started",
+    "buildLogs": []
+  },
   "349830960": {
     "id": "349830960",
     "url": "https://github.com/makiisthenes/TiktokAutoUploader",
     "name": "TiktokAutoUploader",
+    "language": "JavaScript",
+    "status": "Not started",
+    "buildLogs": []
+  },
+  "352933140": {
+    "id": "352933140",
+    "url": "https://github.com/ToolJet/ToolJet",
+    "name": "ToolJet",
     "language": "JavaScript",
     "status": "Not started",
     "buildLogs": []
@@ -651,6 +774,14 @@
     "url": "https://github.com/Dujltqzv/Some-Many-Books",
     "name": "Some-Many-Books",
     "language": null,
+    "status": "Not started",
+    "buildLogs": []
+  },
+  "410749029": {
+    "id": "410749029",
+    "url": "https://github.com/spacedriveapp/spacedrive",
+    "name": "spacedrive",
+    "language": "TypeScript",
     "status": "Not started",
     "buildLogs": []
   },
@@ -737,6 +868,14 @@
       "No package.json found, skipping npm install and build"
     ]
   },
+  "617724924": {
+    "id": "617724924",
+    "url": "https://github.com/mcarlucci/decky-storage-cleaner",
+    "name": "decky-storage-cleaner",
+    "language": "TypeScript",
+    "status": "Not started",
+    "buildLogs": []
+  },
   "623482435": {
     "id": "623482435",
     "url": "https://github.com/OpenDriveLab/End-to-end-Autonomous-Driving",
@@ -750,6 +889,14 @@
     "url": "https://github.com/chhearn/WSU_AUTpaTT",
     "name": "WSU_AUTpaTT",
     "language": "Python",
+    "status": "Not started",
+    "buildLogs": []
+  },
+  "637944202": {
+    "id": "637944202",
+    "url": "https://github.com/ivansaul/flutter_todo_app",
+    "name": "flutter_todo_app",
+    "language": "Dart",
     "status": "Not started",
     "buildLogs": []
   },
@@ -782,6 +929,14 @@
     "url": "https://github.com/microsoft/autogen",
     "name": "autogen",
     "language": "Jupyter Notebook",
+    "status": "Not started",
+    "buildLogs": []
+  },
+  "725199682": {
+    "id": "725199682",
+    "url": "https://github.com/abualgait/AppStarter",
+    "name": "AppStarter",
+    "language": "Kotlin",
     "status": "Not started",
     "buildLogs": []
   },
@@ -833,6 +988,14 @@
     "url": "https://github.com/AIHawk-FOSS/Auto_Jobs_Applier_AI_Agent",
     "name": "Auto_Jobs_Applier_AI_Agent",
     "language": "Python",
+    "status": "Not started",
+    "buildLogs": []
+  },
+  "838501930": {
+    "id": "838501930",
+    "url": "https://github.com/trinhminhtriet/rmrfrs",
+    "name": "rmrfrs",
+    "language": "Rust",
     "status": "Not started",
     "buildLogs": []
   },

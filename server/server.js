@@ -8,6 +8,8 @@ import basicRoutes from "./routes/index.js";
 import authRoutes from "./routes/auth.js";
 import repositoryRoutes from './routes/repository.js'; // Added for GitHub repository search
 import { authenticateWithToken } from './routes/middleware/auth.js';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 
 dotenv.config();
 
@@ -95,6 +97,24 @@ app.use((err, req, res, next) => {
   res.status(500).send("There was an error serving your request.");
 });
 
-app.listen(port, () => {
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"]
+  }
+});
+
+export { io };
+
+io.on('connection', (socket) => {
+  console.log('A client connected');
+
+  socket.on('disconnect', () => {
+    console.log('A client disconnected');
+  });
+});
+
+httpServer.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });

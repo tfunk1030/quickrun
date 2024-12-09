@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Repository, buildRepository, runRepository } from "@/api/repository";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Play, AlertCircle, FileText, Loader2 } from "lucide-react";
+import { Play, Loader2, FileText } from "lucide-react";
+import socket from '@/api/socket';
 import { useToast } from "@/hooks/useToast";
 
 type RepositoryCardProps = {
@@ -14,7 +15,18 @@ type RepositoryCardProps = {
 
 export function RepositoryCard({ repository: initialRepository, onViewLogs, onStatusChange }: RepositoryCardProps) {
   const [repository, setRepository] = useState(initialRepository);
+  const [logs, setLogs] = useState<string[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    socket.on(`repository:${repository.id}:log`, (log: string) => {
+      setLogs((prevLogs) => [...prevLogs, log]);
+    });
+
+    return () => {
+      socket.off(`repository:${repository.id}:log`);
+    };
+  }, [repository.id]);
 
   const updateRepositoryStatus = (newStatus: Repository['status']) => {
     setRepository(prev => ({ ...prev, status: newStatus }));
@@ -56,6 +68,7 @@ export function RepositoryCard({ repository: initialRepository, onViewLogs, onSt
     }
 
     updateRepositoryStatus('running');
+    setLogs([]); // Clear logs before running
     try {
       const result = await runRepository(repository.id);
       if (result.success) {
@@ -102,6 +115,16 @@ export function RepositoryCard({ repository: initialRepository, onViewLogs, onSt
           <p className="text-sm text-muted-foreground">{repository.url}</p>
           <Badge variant="outline">{repository.language}</Badge>
         </div>
+        {logs.length > 0 && (
+          <div className="mt-4">
+            <h3>Logs:</h3>
+            <pre className="bg-gray-100 p-2 rounded">
+              {logs.map((log, index) => (
+                <div key={index}>{log}</div>
+              ))}
+            </pre>
+          </div>
+        )}
       </CardContent>
       <CardFooter className="flex justify-between">
         {repository.status === 'Not started' || repository.status === 'error' ? (

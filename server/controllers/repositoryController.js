@@ -52,10 +52,14 @@ export const buildRepository = async (req, res) => {
       return res.status(400).json({ error: 'Repository URL is required' });
     }
 
-    // Extract owner and repo from the GitHub URL
-    const urlParts = url.split('/');
-    const owner = urlParts[urlParts.length - 2];
-    const repo = urlParts[urlParts.length - 1];
+    // Use regex to extract owner and repo from the GitHub URL
+    const match = url.match(/github\.com\/([^\/]+)\/([^\/\.]+)/);
+    if (!match) {
+      log.warn('Invalid GitHub URL format');
+      return res.status(400).json({ error: 'Invalid GitHub URL format' });
+    }
+
+    const [, owner, repo] = match;
 
     // Fetch repository information from GitHub
     const { data: repoData } = await octokit.repos.get({ owner, repo });
@@ -77,5 +81,28 @@ export const buildRepository = async (req, res) => {
   } catch (error) {
     log.error('Error initiating repository build:', error);
     res.status(500).json({ error: 'Failed to initiate repository build' });
+  }
+};
+
+export const getRepository = async (req, res) => {
+  try {
+    const { id } = req.params;
+    log.info(`Fetching repository with id: ${id}`);
+
+    // In a real application, you would fetch this from a database
+    // For now, we'll return a mock repository object
+    const repository = {
+      id,
+      url: 'https://github.com/example/repo',
+      name: 'Example Repository',
+      language: 'JavaScript',
+      status: 'ready',
+      buildLogs: ['Build started', 'Dependencies installed', 'Build completed'],
+    };
+
+    res.json(repository);
+  } catch (error) {
+    log.error('Error fetching repository:', error);
+    res.status(500).json({ error: 'Failed to fetch repository' });
   }
 };

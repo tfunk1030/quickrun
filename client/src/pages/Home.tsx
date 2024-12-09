@@ -16,7 +16,7 @@ export function Home() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { register, handleSubmit, reset } = useForm<BuildForm>();
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<BuildForm>();
 
   const onSubmit = async (data: BuildForm) => {
     try {
@@ -29,10 +29,11 @@ export function Home() {
       reset();
       navigate(`/repositories/${repository.id}`);
     } catch (error) {
+      console.error("Error in Home onSubmit:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to build repository",
+        description: error instanceof Error ? error.message : "Failed to build repository",
       });
     } finally {
       setLoading(false);
@@ -49,18 +50,29 @@ export function Home() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="flex gap-2">
-            <Input
-              placeholder="https://github.com/user/repo"
-              {...register("url", { required: true })}
-            />
-            <Button type="submit" disabled={loading}>
-              {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Search className="h-4 w-4" />
-              )}
-            </Button>
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
+            <div className="flex gap-2">
+              <Input
+                placeholder="https://github.com/user/repo"
+                {...register("url", {
+                  required: "Repository URL is required",
+                  pattern: {
+                    value: /^https:\/\/github\.com\/[^\/]+\/[^\/]+$/,
+                    message: "Invalid GitHub repository URL"
+                  }
+                })}
+              />
+              <Button type="submit" disabled={loading}>
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Search className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+            {errors.url && (
+              <p className="text-sm text-red-500">{errors.url.message}</p>
+            )}
           </form>
         </CardContent>
       </Card>

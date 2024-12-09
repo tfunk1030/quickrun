@@ -29,19 +29,13 @@ export const searchRepositories = async (query: string): Promise<Repository[]> =
 // GET /repositories/:id
 // Response: Repository
 export const getRepository = async (id: string): Promise<Repository> => {
-  // Mock data
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        id,
-        url: 'https://github.com/facebook/react',
-        name: 'react',
-        language: 'JavaScript',
-        status: 'ready',
-        buildLogs: ['Installing dependencies...', 'Build successful!']
-      });
-    }, 500);
-  });
+  try {
+    const response = await api.get(`/repositories/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching repository:", error);
+    throw error;
+  }
 };
 
 // Build Repository
@@ -49,19 +43,13 @@ export const getRepository = async (id: string): Promise<Repository> => {
 // Request: { url: string }
 // Response: Repository
 export const buildRepository = async (url: string): Promise<Repository> => {
-  // Mock data
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        id: '3',
-        url,
-        name: url.split('/').pop() || '',
-        language: 'Unknown',
-        status: 'pending',
-        buildLogs: []
-      });
-    }, 500);
-  });
+  try {
+    const response = await api.post('/repositories/build', { url });
+    return response.data;
+  } catch (error) {
+    console.error("Error in buildRepository:", error);
+    throw error;
+  }
 };
 
 // Run Repository

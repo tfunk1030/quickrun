@@ -51,6 +51,7 @@ export function Repositories() {
         description: "Repository is now running",
       });
     } catch (error) {
+      console.error("Error running repository:", error);
       toast({
         variant: "destructive",
         title: "Error",

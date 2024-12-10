@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -7,41 +8,34 @@ import { useToast } from '@/hooks/useToast';
 import { updateSettings } from '@/api/settings';
 
 export function Settings() {
-  const [autoRunAfterBuild, setAutoRunAfterBuild] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const navigate = useNavigate();
+  const [autoRunAfterBuild, setAutoRunAfterBuild] = React.useState(false);
+  const [darkMode, setDarkMode] = React.useState(false);
   const { toast } = useToast();
 
-  console.log("Rendering Settings component");
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      navigate('/login');
+    }
+  }, [navigate]);
 
-  const handleToggleChange = (setting: 'autoRunAfterBuild' | 'darkMode') => {
-    console.log(`Toggle changed for ${setting}`);
+  const handleToggleChange = (setting) => {
     if (setting === 'autoRunAfterBuild') {
-      const newValue = !autoRunAfterBuild;
-      console.log(`autoRunAfterBuild changing to: ${newValue}`);
-      setAutoRunAfterBuild(newValue);
+      setAutoRunAfterBuild(!autoRunAfterBuild);
     } else if (setting === 'darkMode') {
-      const newValue = !darkMode;
-      console.log(`darkMode changing to: ${newValue}`);
-      setDarkMode(newValue);
+      setDarkMode(!darkMode);
     }
   };
 
-  useEffect(() => {
-    console.log('Current state:', { autoRunAfterBuild, darkMode });
-  }, [autoRunAfterBuild, darkMode]);
-
   const handleSave = async () => {
-    console.log("Save button clicked");
     try {
-      const response = await updateSettings({ autoRunAfterBuild, darkMode });
-      console.log("API response:", response);
+      await updateSettings({ autoRunAfterBuild, darkMode });
       toast({
         title: "Settings saved",
         description: "Your settings have been updated successfully."
       });
-      console.log("Settings saved successfully");
     } catch (error) {
-      console.error('Error saving settings:', error);
       toast({
         title: "Error saving settings",
         description: error.toString(),
@@ -49,8 +43,6 @@ export function Settings() {
       });
     }
   };
-
-  console.log("Rendering Settings UI");
 
   return (
     <div className="space-y-6">
@@ -62,10 +54,7 @@ export function Settings() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div
-            className="flex items-center justify-between"
-            onClick={() => console.log('Switch container clicked')}
-          >
+          <div className="flex items-center justify-between">
             <div className="space-y-1">
               <Label>Auto-run after build</Label>
               <p className="text-sm text-muted-foreground">

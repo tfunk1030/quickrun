@@ -1,37 +1,56 @@
 import bcrypt from 'bcrypt';
+import { logger } from '../utils/log.js';
 
-/**
- * Hashes the password using bcrypt algorithm
- * @param {string} password - The password to hash
- * @return {Promise<string>} Password hash
- */
+const log = logger('utils/password');
+
 export const generatePasswordHash = async (password) => {
-  const salt = await bcrypt.genSalt();
-  const hash = await bcrypt.hash(password, salt);
-  return hash;
+  log.info('Generating hash for password');
+  const saltRounds = 10;
+  try {
+    const salt = await bcrypt.genSalt(saltRounds);
+    log.info(`Generated salt: ${salt}`);
+    const hash = await bcrypt.hash(password, salt);
+    log.info(`Generated hash: ${hash}`);
+    return hash;
+  } catch (error) {
+    log.error('Error generating password hash:', error.message);
+    log.error(error.stack);
+    throw error;
+  }
 };
 
-/**
- * Validates the password against the hash
- * @param {string} password - The password to verify
- * @param {string} hash - Password hash to verify against
- * @return {Promise<boolean>} True if the password matches the hash, false otherwise
- */
 export const validatePassword = async (password, hash) => {
-  return bcrypt.compare(password, hash);
+  log.info('Validating password');
+  log.info(`Input password length: ${password ? password.length : 'undefined'}`);
+  log.info(`Stored hash length: ${hash ? hash.length : 'undefined'}`);
+  try {
+    if (!password || !hash) {
+      log.info('Password or hash is undefined or empty');
+      return false;
+    }
+    const result = await bcrypt.compare(password, hash);
+    log.info(`Password validation result: ${result}`);
+    return result;
+  } catch (error) {
+    log.error('Error validating password:', error.message);
+    log.error(error.stack);
+    throw error;
+  }
 };
 
-/**
- * Checks that the hash has a valid format
- * @param {string} hash - Hash to check format for
- * @return {boolean} True if passed string seems like valid hash, false otherwise
- */
 export const isPasswordHash = (hash) => {
-  if (!hash || hash.length !== 60) return false;
+  log.info('Checking password hash format');
+  if (!hash || hash.length !== 60) {
+    log.info('Invalid password hash format');
+    return false;
+  }
   try {
     bcrypt.getRounds(hash);
+    log.info('Password hash format is valid');
     return true;
-  } catch {
+  } catch (error) {
+    log.error('Error checking password hash format:', error.message);
+    log.error(error.stack);
     return false;
   }
 };

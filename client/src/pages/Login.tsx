@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -85,6 +85,7 @@ export function Login() {
               )}
             </Button>
           </form>
+          <p>Don't have an account? <Link to="/register">Register here</Link></p>
         </CardContent>
       </Card>
     </div>

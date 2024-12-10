@@ -1,17 +1,18 @@
 import dotenv from 'dotenv';
+dotenv.config();
 import mongoose from 'mongoose';
 import express from 'express';
+import http from 'http';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import cors from 'cors';
 import basicRoutes from "./routes/index.js";
 import authRoutes from "./routes/auth.js";
-import repositoryRoutes from './routes/repository.js'; // Added for GitHub repository search
+import repositoryRoutes from './routes/repository.js';
 import { authenticateWithToken } from './routes/middleware/auth.js';
+import settingsRoutes from './routes/settings.js';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-
-dotenv.config();
 
 if (!process.env.DATABASE_URL || !process.env.SESSION_SECRET) {
   console.error("Error: DATABASE_URL or SESSION_SECRET variables in .env missing.");
@@ -19,33 +20,54 @@ if (!process.env.DATABASE_URL || !process.env.SESSION_SECRET) {
 }
 
 const app = express();
-const port = process.env.PORT || 3000;
-// Pretty-print JSON responses
+const server = http.createServer(app);
+
+const PORT = process.env.PORT || 3000;
+
+const startServer = (port) => {
+  server.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+  }).on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.log(`Port ${port} is busy, trying ${port + 1}`);
+      startServer(port + 1);
+    } else {
+      console.error('Server error:', err);
+    }
+  });
+};
+
 app.enable('json spaces');
-// We want to be consistent with URL paths, so we enable strict routing
 app.enable('strict routing');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-// Authentication routes
 app.use(authenticateWithToken);
 app.use(authRoutes);
 
-// Database connection
-mongoose
-  .connect(process.env.DATABASE_URL)
-  .then(() => {
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.DATABASE_URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000
+    });
     console.log("Database connected successfully");
-  })
-  .catch((err) => {
-    console.error(`Database connection error: ${err.message}`);
-    console.error(err.stack);
+  } catch (err) {
+    console.error("Database connection error:", err.message);
     process.exit(1);
-  });
+  }
+};
 
-// Session configuration with connect-mongo
+connectDB().then(() => {
+  startServer(PORT);
+}).catch(err => {
+  console.error("Failed to connect to the database:", err);
+  process.exit(1);
+});
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -60,45 +82,39 @@ app.on("error", (error) => {
   console.error(error.stack);
 });
 
-// Logging session creation and destruction
 app.use((req, res, next) => {
   const sess = req.session;
-  // Make session available to all views
   res.locals.session = sess;
   if (!sess.views) {
     sess.views = 1;
     console.log("Session created at: ", new Date().toISOString());
   } else {
     sess.views++;
-    console.log(
-      `Session accessed again at: ${new Date().toISOString()}, Views: ${sess.views}, User ID: ${sess.userId || '(unauthenticated)'}`,
-    );
+    console.log(`Session accessed again at: ${new Date().toISOString()}, Views: ${sess.views}, User ID: ${sess.userId || '(unauthenticated)'}`);
   }
   next();
 });
 
-// Basic Routes
 app.use(basicRoutes);
-// Authentication Routes
 app.use('/api/auth', authRoutes);
-
-// Repository Routes - Added for GitHub repository search and build
 app.use('/api/repositories', repositoryRoutes);
+app.use('/api/settings', settingsRoutes);
 
-// If no routes handled the request, it's a 404
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'OK' });
+});
+
 app.use((req, res, next) => {
   res.status(404).send("Page not found.");
 });
 
-// Error handling
 app.use((err, req, res, next) => {
   console.error(`Unhandled application error: ${err.message}`);
   console.error(err.stack);
   res.status(500).send("There was an error serving your request.");
 });
 
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
+const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173",
     methods: ["GET", "POST"]
@@ -113,8 +129,4 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('A client disconnected');
   });
-});
-
-httpServer.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
 });

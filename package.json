@@ -16,6 +16,8 @@
   "description": "",
   "dependencies": {
     "concurrently": "^9.1.0",
+    "mongo": "^0.1.0",
+    "mongodb": "^6.11.0",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1"
   }

@@ -1,5 +1,10 @@
 import { io } from 'socket.io-client';
+import { getBaseUrl } from './Api';
 
-const socket = io('http://localhost:3000');
+const connectSocket = async () => {
+  const baseUrl = await getBaseUrl();
+  const socketUrl = baseUrl.replace('/api', '');
+  return io(socketUrl);
+};
 
-export default socket;
+export default connectSocket();

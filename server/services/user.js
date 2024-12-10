@@ -61,18 +61,26 @@ class UserService {
 
     try {
       const user = await User.findOne({email}).exec();
-      if (!user) return null;
+      if (!user) {
+        console.log('User not found for email:', email);
+        return null;
+      }
 
       const passwordValid = await validatePassword(password, user.password);
-      if (!passwordValid) return null;
+      console.log('Password validation result:', passwordValid);
+
+      if (!passwordValid) {
+        console.log('Invalid password for user:', email);
+        return null;
+      }
 
       user.lastLoginAt = Date.now();
       const updatedUser = await user.save();
+      console.log('User authenticated successfully:', email);
       return updatedUser;
     } catch (err) {
-      console.error(`Error authenticating user ${email} with password:`, err.message);
-      console.error(err.stack);
-      throw `Database error while authenticating user ${email} with password: ${err}`;
+      console.error(`Error authenticating user ${email}:`, err.message);
+      throw `Database error while authenticating user ${email}: ${err}`;
     }
   }
 
@@ -81,13 +89,12 @@ class UserService {
       return User.findOne({ token }).exec();
     } catch (err) {
       console.error(`Error authenticating user with token:`, err.message);
-      console.error(err.stack);
       throw `Database error while authenticating user with token: ${err}`;
     }
   }
 
   static async regenerateToken(user) {
-    user.token = randomUUID(); // eslint-disable-line
+    user.token = randomUUID();
 
     try {
       if (!user.isNew) {
@@ -97,7 +104,6 @@ class UserService {
       return user;
     } catch (err) {
       console.error(`Error generating user token:`, err.message);
-      console.error(err.stack);
       throw `Database error while generating user token: ${err}`;
     }
   }
@@ -120,17 +126,17 @@ class UserService {
       });
 
       await user.save();
+      console.log('User created with email:', email);
       return user;
     } catch (err) {
       console.error(`Error creating new user:`, err.message);
-      console.error(err.stack);
       throw `Database error while creating new user: ${err}`;
     }
   }
 
   static async setPassword(user, password) {
     if (!password) throw 'Password is required';
-    user.password = await generatePasswordHash(password); // eslint-disable-line
+    user.password = await generatePasswordHash(password);
 
     try {
       if (!user.isNew) {
@@ -140,8 +146,26 @@ class UserService {
       return user;
     } catch (err) {
       console.error(`Error setting user password:`, err.message);
-      console.error(err.stack);
       throw `Database error while setting user password: ${err}`;
+    }
+  }
+
+  static async updateUserPassword(email, newPassword) {
+    const hash = await generatePasswordHash(newPassword);
+    try {
+      const updatedUser = await User.findOneAndUpdate(
+        { email },
+        { password: hash },
+        { new: true }
+      );
+      if (!updatedUser) {
+        throw new Error('User not found');
+      }
+      console.log(`Password updated for user: ${email}`);
+      return updatedUser;
+    } catch (err) {
+      console.error(`Error updating password for user ${email}:`, err.message);
+      throw err;
     }
   }
 }

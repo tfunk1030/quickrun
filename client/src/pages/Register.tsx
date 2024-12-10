@@ -26,6 +26,7 @@ export function Register() {
   const { toast } = useToast()
   const navigate = useNavigate()
   const { register, handleSubmit } = useForm<RegisterForm>()
+  const [error, setError] = useState('')
 
   const onSubmit = async (data: RegisterForm) => {
     try {
@@ -37,11 +38,12 @@ export function Register() {
       })
       navigate("/login")
     } catch (error) {
-      console.log("Register error:", error)
+      console.error('Register error:', error);
+      setError(error.message);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.response?.data?.error,
+        description: error.message,
       })
     } finally {
       setLoading(false)
@@ -57,6 +59,7 @@ export function Register() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {error && <div className="text-red-500">{error}</div>}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input

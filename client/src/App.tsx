@@ -8,7 +8,7 @@ import { Layout } from "./components/Layout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Home } from "./pages/Home";
 import { Repositories } from "./pages/Repositories";
-import { RepositoryDetail } from "./pages/RepositoryDetail"; // Added import for RepositoryDetail
+import { RepositoryDetail } from "./pages/RepositoryDetail";
 import { Settings } from "./pages/Settings";
 import axios from 'axios';
 
@@ -31,7 +31,7 @@ function App() {
             <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
               <Route index element={<Home />} />
               <Route path="repositories" element={<Repositories />} />
-              <Route path="repositories/:id" element={<RepositoryDetail />} /> {/* Added route for RepositoryDetail */}
+              <Route path="repositories/:id" element={<RepositoryDetail />} />
               <Route path="settings" element={<Settings />} />
             </Route>
           </Routes>

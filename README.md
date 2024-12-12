@@ -16,21 +16,21 @@ The application uses Docker containers for sandboxed execution, ensuring that de
 ```
 quickrun/
 ├── client/
-│   ├── public/
 │   ├── src/
+│   │   ├── components/
+│   │   │   ├── ui/
+│   │   │   ├── Layout.tsx
+│   │   │   ├── Header.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   └── Sidebar.tsx
+│   │   ├── lib/
+│   │   │   └── utils.ts
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   ├── index.html
 │   ├── package.json
-│   ├── vite.config.ts
-│   └── ...
-├── server/
-│   ├── controllers/
-│   ├── models/
-│   ├── routes/
-│   ├── services/
-│   ├── utils/
-│   ├── package.json
-│   ├── server.js
-│   └── ...
-├── .env
+│   ├── tsconfig.json
+│   └── vite.config.ts
 └── README.md
 ```
 
